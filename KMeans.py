@@ -27,7 +27,7 @@ class KM(object):
         self.k = num_clusters
         self.centers = [np.random.rand(1, 784) for _ in range(num_clusters)]
         self.labels = np.empty((60000, 1))
-        self.images = preprocess(images / 255.0)
+        self.images = images / 255.0
         self.num_points = self.images.shape[1]
         print 'initialization done, image shape: {0}'.format(self.images.shape)
 
@@ -35,19 +35,17 @@ class KM(object):
         plt.ion()
         plt.show()
         for _ in xrange(iterations):
-            plt.figure()
             for i in xrange(self.images.shape[0]):
                 img = self.images[i].reshape(1, 784)
                 scores = np.array([mean_squared(center, img) for center in self.centers])
                 self.labels[i] = np.argmax(scores)
-            self.centers = [self.recompute_center(k) for k in xrange(self.k)]
-            f, axarr = plt.subplots(5, 4)
+            self.centers = [self.recompute_center(k, center) for center, k in zip(self.centers, xrange(self.k))]
+            f, axarr = plt.subplots(4, 4)
             for center, c in zip(self.centers, xrange(len(self.centers))):
-                print 'hello world'
-                axarr[(c + 1) / 5, c % 4].imshow(center.reshape(28, 28), cmap='Greys')
+                axarr[c / 4, c % 4].imshow(center.reshape(28, 28), cmap='Greys')
             plt.draw()
 
-    def recompute_center(self, k):
+    def recompute_center(self, k, center):
         mean = np.zeros((1, 784))
         total = 0
         for label, i in zip(self.labels, xrange(len(self.labels))):
@@ -56,6 +54,8 @@ class KM(object):
                 # print 'image shape: {0}'.format(image.shape)
                 mean += image
                 total += 1
+        if total == 0:
+            return center
         return mean / float(total)
 
 
