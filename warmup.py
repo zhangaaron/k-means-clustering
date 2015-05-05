@@ -40,7 +40,7 @@ class KNN(object):
     ratings = None
     cached = {}
 
-    def __init__(self, ratings, k=10, distance=mean_squared):
+    def __init__(self, ratings, k=1000, distance=mean_squared):
         self.k = k
         self.distance = distance
         self.ratings = ratings
@@ -51,6 +51,7 @@ class KNN(object):
             k_nearest = self.cached[user]
         else:
             k_nearest = self.return_k_nearest_users(user)
+            self.cached[user] = k_nearest
         return 1 if k_nearest[joke - 1] >= 0 else 0
 
     def return_k_nearest_users(self, user):
