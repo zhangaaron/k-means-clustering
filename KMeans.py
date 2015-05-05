@@ -22,7 +22,7 @@ class KM(object):
     distance = None
     num_points = None
 
-    def __init__(self, images, preprocess=preprocessing.scale, num_clusters=10, distance=mean_squared):
+    def __init__(self, images, preprocess=preprocessing.scale, num_clusters=5, distance=mean_squared):
         self.distance = distance
         self.k = num_clusters
         self.centers = [np.random.rand(1, 784) for _ in range(num_clusters)]
@@ -34,15 +34,18 @@ class KM(object):
     def train(self, iterations=25):
         plt.ion()
         plt.show()
-        for _ in xrange(iterations):
+        for iteration in xrange(iterations):
+            total_loss = 0
             for i in xrange(self.images.shape[0]):
                 img = self.images[i].reshape(1, 784)
                 scores = np.array([mean_squared(center, img) for center in self.centers])
-                self.labels[i] = np.argmax(scores)
+                self.labels[i] = np.argmin(scores)
+                total_loss += scores[np.argmin(scores)]
             self.centers = [self.recompute_center(k, center) for center, k in zip(self.centers, xrange(self.k))]
             f, axarr = plt.subplots(4, 4)
             for center, c in zip(self.centers, xrange(len(self.centers))):
                 axarr[c / 4, c % 4].imshow(center.reshape(28, 28), cmap='Greys')
+            print 'Total loss is {0} for iteration {1}'.format(total_loss, iteration)
             plt.draw()
 
     def recompute_center(self, k, center):
